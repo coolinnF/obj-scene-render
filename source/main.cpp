@@ -1,4 +1,4 @@
-#include "./headers/vector.h"
+#include "../headers/vector.h"
 
 int main() {
     int nx = 200;
