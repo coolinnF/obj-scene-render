@@ -32,6 +32,8 @@ int main() {
     int ny = 150;
     int ns = 100;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+
+    // Object initialization into scene
     hitable *list[5];
     list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
     list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
@@ -39,7 +41,17 @@ int main() {
     list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
     list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
     hitable *world = new hitable_list(list, 5);
-    camera cam;
+
+    // Camera propertiesl
+    vec3 lookfrom(3, 3, 2);
+    vec3 lookat(0, 0, -1);
+    vec3 vup(0, 1, 0);
+    float dist_to_focus = (lookfrom - lookat).length();
+    float aperture = 0.1;
+
+    // Camera
+    camera cam(lookfrom, lookat, vup, 40, float(nx)/float(ny), aperture, dist_to_focus);
+
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
