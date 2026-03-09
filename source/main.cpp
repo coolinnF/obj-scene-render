@@ -7,31 +7,38 @@
 #include "../headers/materials.h"
 #include "../headers/sphere.h"
 
-vec3 color(const ray& r, hitable *world, int depth) {
+vec3 color(const ray &r, hitable *world, int depth)
+{
     hit_record rec;
-    if (world->hit(r, 0.001, FLT_MAX, rec)) {
+    if (world->hit(r, 0.001, FLT_MAX, rec))
+    {
         ray scattered;
         vec3 attenuation;
-        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-            return attenuation*color(scattered, world, depth+1);
+        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+        {
+            return attenuation * color(scattered, world, depth + 1);
         }
-        else {
+        else
+        {
             return vec3(0, 0, 0);
         }
     }
-    else {
+    else
+    {
         vec3 unit_direction = unit_vector(r.direction());
         float t = 0.5 * (unit_direction.y() + 1.0);
-        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
+        return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
     }
 }
 
-int main() {
+int main()
+{
     srand(std::time(NULL));
     int nx = 300;
     int ny = 150;
     int ns = 100;
-    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+    std::cout << "P3\n"
+              << nx << " " << ny << "\n255\n";
 
     // Object initialization into scene
     hitable *list[5];
@@ -50,12 +57,15 @@ int main() {
     float aperture = 0.1;
 
     // Camera
-    camera cam(lookfrom, lookat, vup, 30, float(nx)/float(ny), aperture, dist_to_focus);
+    camera cam(lookfrom, lookat, vup, 30, float(nx) / float(ny), aperture, dist_to_focus);
 
-    for (int j = ny-1; j >= 0; j--) {
-        for (int i = 0; i < nx; i++) {
+    for (int j = ny - 1; j >= 0; j--)
+    {
+        for (int i = 0; i < nx; i++)
+        {
             vec3 col(0, 0, 0);
-            for (int s = 0; s < ns; s++) {
+            for (int s = 0; s < ns; s++)
+            {
                 float u = float(i + (float)rand() / RAND_MAX) / float(nx);
                 float v = float(j + (float)rand() / RAND_MAX) / float(ny);
 
@@ -65,9 +75,9 @@ int main() {
             }
             col /= float(ns);
             col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); // Less dark of shadow
-            int ir = int(255.99*col[0]);
-            int ig = int(255.99*col[1]);
-            int ib = int(255.99*col[2]);
+            int ir = int(255.99 * col[0]);
+            int ig = int(255.99 * col[1]);
+            int ib = int(255.99 * col[2]);
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }

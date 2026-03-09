@@ -3,34 +3,39 @@
 
 #include "hitable.h"
 
-class sphere : public hitable {
-    public:
-        sphere() {}
-        sphere(vec3 cen, float r, material *m) : center(cen), radius(r), mat_ptr(m) {};
-        virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
-        virtual bool bounding_box(aabb& box) const;
-        vec3 center;
-        float radius;
-        material *mat_ptr;
+class sphere : public hitable
+{
+public:
+    sphere() {}
+    sphere(vec3 cen, float r, material *m) : center(cen), radius(r), mat_ptr(m) {};
+    virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const;
+    virtual bool bounding_box(aabb &box) const;
+    vec3 center;
+    float radius;
+    material *mat_ptr;
 };
 
-bool sphere::hit(const ray& r, float tmin, float tmax, hit_record& rec) const {
+bool sphere::hit(const ray &r, float tmin, float tmax, hit_record &rec) const
+{
     vec3 oc = r.origin() - center;
     float a = dot(r.direction(), r.direction());
     float b = dot(oc, r.direction());
-    float c = dot(oc, oc) - radius*radius;
-    float disc = b*b - a*c;
-    if (disc > 0) {
-        float temp = (-b - sqrt(b*b - a*c))/a;
-        if (temp < tmax && temp > tmin) {
+    float c = dot(oc, oc) - radius * radius;
+    float disc = b * b - a * c;
+    if (disc > 0)
+    {
+        float temp = (-b - sqrt(b * b - a * c)) / a;
+        if (temp < tmax && temp > tmin)
+        {
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius;
             rec.mat_ptr = mat_ptr;
             return true;
         }
-        temp = (-b + sqrt(b*b - a*c)) / a;
-        if (temp < tmax && temp > tmin) {
+        temp = (-b + sqrt(b * b - a * c)) / a;
+        if (temp < tmax && temp > tmin)
+        {
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius;
@@ -41,13 +46,12 @@ bool sphere::hit(const ray& r, float tmin, float tmax, hit_record& rec) const {
     return false;
 }
 
-bool sphere::bounding_box(aabb& box) const {
+bool sphere::bounding_box(aabb &box) const
+{
     box = aabb(
         center - vec3(radius, radius, radius),
-        center + vec3(radius, radius, radius)
-    );
+        center + vec3(radius, radius, radius));
     return true;
 }
-
 
 #endif
