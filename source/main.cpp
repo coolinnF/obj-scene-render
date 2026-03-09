@@ -2,9 +2,9 @@
 #include <ctime>
 #include "float.h"
 
+#include "../headers/bvh.h"
 #include "../headers/camera.h"
 #include "../headers/materials.h"
-#include "../headers/hitablelist.h"
 #include "../headers/sphere.h"
 
 vec3 color(const ray& r, hitable *world, int depth) {
@@ -40,7 +40,7 @@ int main() {
     list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 1));
     list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
     list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
-    hitable *world = new hitable_list(list, 5);
+    hitable *world = new bvh_node(list, 5);
 
     // Camera propertiesl
     vec3 lookfrom(3, 3, 2);
@@ -50,7 +50,7 @@ int main() {
     float aperture = 0.1;
 
     // Camera
-    camera cam(lookfrom, lookat, vup, 40, float(nx)/float(ny), aperture, dist_to_focus);
+    camera cam(lookfrom, lookat, vup, 30, float(nx)/float(ny), aperture, dist_to_focus);
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {

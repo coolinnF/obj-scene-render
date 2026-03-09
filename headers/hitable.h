@@ -2,6 +2,8 @@
 #define HITABLEH
 #include "ray.h"
 
+// forward declarations so hitable can ref
+class aabb;
 class material;
 
 struct hit_record {
@@ -14,6 +16,7 @@ struct hit_record {
 class hitable {
     public:
         virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const = 0;
+        virtual bool bounding_box(aabb& box) const = 0;
 };
 
 #endif
