@@ -6,6 +6,7 @@
 #include "../headers/camera.h"
 #include "../headers/materials.h"
 #include "../headers/sphere.h"
+#include "../headers/mesh.h"
 
 vec3 color(const ray &r, hitable *world, int depth)
 {
@@ -26,8 +27,20 @@ vec3 color(const ray &r, hitable *world, int depth)
     else
     {
         vec3 unit_direction = unit_vector(r.direction());
-        float t = 0.5 * (unit_direction.y() + 1.0);
-        return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+        float t = 0.5f * (unit_direction.y() + 1.0f);
+
+        // Sunset gradient to look prettier
+        vec3 horizon(1.0, 0.45, 0.15);   // warm orange
+        vec3 zenith (0.10, 0.15, 0.40);  // deep dusk blue
+        vec3 ground (0.20, 0.12, 0.08);  // dark warm ground
+
+        if (t > 0.5f) {
+            float s = (t - 0.5f) * 2.0f;
+            return (1.0f - s) * horizon + s * zenith;
+        } else {
+            float s = t * 2.0f;
+            return (1.0f - s) * ground + s * horizon;
+        }
     }
 }
 
@@ -36,28 +49,46 @@ int main()
     srand(std::time(NULL));
     int nx = 300;
     int ny = 150;
-    int ns = 100;
-    std::cout << "P3\n"
-              << nx << " " << ny << "\n255\n";
+    int ns = 250;
+    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
-    // Object initialization into scene
-    hitable *list[5];
-    list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
-    list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-    list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 1));
-    list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
-    list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
-    hitable *world = new bvh_node(list, 5);
+    std::vector<hitable*> scene;
 
-    // Camera propertiesl
-    vec3 lookfrom(3, 3, 2);
-    vec3 lookat(0, 0, -1);
+    // // spheres
+    // scene.push_back(new sphere(vec3(0,    0,   -1),   0.5,  new lambertian(vec3(0.1, 0.2, 0.5))));
+    // scene.push_back(new sphere(vec3(0, -100.5, -1),  100,   new lambertian(vec3(0.8, 0.8, 0.0))));
+    // scene.push_back(new sphere(vec3(1,    0,   -1),   0.5,  new metal(vec3(0.8, 0.6, 0.2), 1)));
+
+    scene.push_back(new sphere(vec3(-1,   1,   3),   0.5,  new dielectric(1.5)));
+    scene.push_back(new sphere(vec3(-1,   1,   3),  -0.45, new dielectric(1.5)));
+
+    // Load an .obj
+    material *wall   = new lambertian(vec3(0.76, 0.70, 0.62));  // warm off-white plaster
+    material *table  = new metal(vec3(0.60, 0.55, 0.50), 0.35); // brushed steel
+    material *mirror = new metal(vec3(0.60, 0.55, 0.50), 0.00); // Polished
+    material *glass  = new dielectric(1.5);                     // window glass (IOR 1.5)
+    material *plant  = new lambertian(vec3(0.18, 0.42, 0.18));  // matte green leaves
+    material *pot    = new lambertian(vec3(0.78, 0.35, 0.20));  // terrracotta
+
+    load_obj("./assets/room.obj",   wall,  scene);
+    load_obj("./assets/window.obj", glass, scene);
+    load_obj("./assets/table.obj",  table, scene);
+    load_obj("./assets/pot.obj",    pot,   scene);
+    load_obj("./assets/plant.obj",  plant, scene);
+    load_obj("./assets/mirror.obj", mirror, scene);
+
+    // BVH over everything — spheres and triangles together
+    hitable *world = new bvh_node(scene.data(), (int)scene.size());
+
+    // Camera properties
+    vec3 lookfrom(-0.9, 1.1, 0.85);
+    vec3 lookat( 0.4, 0.85, -0.3);
     vec3 vup(0, 1, 0);
     float dist_to_focus = (lookfrom - lookat).length();
-    float aperture = 0.1;
+    float aperture = 0.015;
 
     // Camera
-    camera cam(lookfrom, lookat, vup, 30, float(nx) / float(ny), aperture, dist_to_focus);
+    camera cam(lookfrom, lookat, vup, 50, float(nx) / float(ny), aperture, dist_to_focus);
 
     for (int j = ny - 1; j >= 0; j--)
     {
