@@ -1,3 +1,16 @@
+/// bvh.h /////////////////////
+// Colin Fairborn
+// Modified: 3/10/26 (comments)
+// References:
+//      - Peter Shirley, "Ray Tracing in One Weekend", 2018
+//        https://www.realtimerendering.com/raytracing/Ray%20Tracing%20in%20a%20Weekend.pdf
+// Purpose:
+//      - Builds a binary tree over hitables
+//      - Each node has an AABB enclosing its children
+//      - During taversal, nodes whose AABB is missed by the ray get skipped
+//      - O(n) reduced to O(log n)
+///////////////////////////////
+
 #ifndef BVHH
 #define BVHH
 
